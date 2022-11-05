@@ -40,20 +40,17 @@ contract Resource is ERC20("Resource", "RESOURCE", 18) {
         _;
     }
 
-    /// @notice Mint any amount of goo to a user. Can only be called by ArtGobblers.
-    /// @param to The address of the user to mint goo to.
-    /// @param amount The amount of goo to mint.
+    /// @notice Mint any amount of resource to a user. Can only be called by Vertex .
+    /// @param to The address of the user to mint Resource to.
+    /// @param amount The amount of Resource to mint.
     function mintFromVertex(address to, uint256 amount) external only(Vertex) {
         _mint(to, amount);
     }
 
-    /// @notice Burn any amount of goo from a user. Can only be called by ArtGobblers.
-    /// @param from The address of the user to burn goo from.
-    /// @param amount The amount of goo to burn.
-    function burnForSettlements(address from, uint256 amount)
-        external
-        only(Vertex)
-    {
+    /// @notice Burn any amount of Resource from a user. Can only be called by Vertex .
+    /// @param from The address of the user to burn Resource from.
+    /// @param amount The amount of Resource to burn.
+    function burnForVertex(address from, uint256 amount) external only(Vertex) {
         _burn(from, amount);
     }
 }
