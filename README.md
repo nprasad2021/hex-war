@@ -1,7 +1,7 @@
 # Hex-War
 **See the live app at https://hex-war-nprasad2021.vercel.app/**
 
-Conquer a virtual world. Grow your holdings by aggressively seeking to mint, and seek NFTs that encircle plots of land, to make them 
+Conquer a virtual world. Grow your holdings by aggressively minting property, forming foreclosures, and outmanuevering your opponents.
 
 ## Mechanics
 The game world is represented as a hexagonal grid.
@@ -15,4 +15,4 @@ Thus if someone else owns controls the entire hex, they have a much faster abili
 
 ##
 
-All state is completely stored, enforced, and verified on-chain. 
+All state is completely stored, enforced, and verified on-chain. No backend required.
