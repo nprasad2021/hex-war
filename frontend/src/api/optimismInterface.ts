@@ -25,7 +25,7 @@ type VertexData = {
 export type AllVertexData = VertexData & { emissionMultiple: ethers.BigNumber };
 
 // hard-coded
-const contractAddress = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
+const contractAddress = "0xa9540D662F63024E9A92927E0527B2bD95Cb9064";
 
 export class OptimismInterface {
   private contract: ethers.Contract;
