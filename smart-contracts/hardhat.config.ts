@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
     },
     'optimism-goerli': {
       url: "https://goerli.optimism.io",
-      accounts: ['']
+      accounts: ['13e5009f0b839d36647efb4495d9d3a99bbd22cf1572bf7b2d2f844eaa71a5c2']
     },
   }
 };
