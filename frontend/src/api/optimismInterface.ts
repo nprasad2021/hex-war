@@ -1,5 +1,5 @@
 import { contractAbi } from "./optimismContractAbi";
-import { ethers } from 'ethers';
+import { ethers, PopulatedTransaction } from 'ethers';
 
 type Hex = {
   a: number;
@@ -47,6 +47,10 @@ export class OptimismInterface {
         value: 0,
       }
     );
+    return txnData;
+  }
+  async transfer(to: string, from: string, tokenId: ethers.BigNumber): Promise<PopulatedTransaction> {
+    const txnData = await this.contract?.populateTransaction.transferFrom(from, to, tokenId);
     return txnData;
   }
 

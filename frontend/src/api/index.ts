@@ -1,5 +1,6 @@
 import * as board from "./board";
 import { AllVertexData, OptimismInterface } from "./optimismInterface";
+import { ethers } from 'ethers';
 
 export const api = {
   board: {
@@ -18,6 +19,10 @@ export class apiv2 {
 
   async mintFromOwnedResource(vertexId: number) {
     return await this.interface.mint(vertexId);
+  }
+
+  async transfer(to: string, from: string, tokenId: ethers.BigNumber): Promise<ethers.PopulatedTransaction> {
+    return await this.interface.transfer(to, from, tokenId);
   }
 
   async board(): Promise<AllVertexData[]> {
