@@ -1,5 +1,5 @@
 import * as board from "./board";
-import { AllVertexData, OptimismInterface } from "./optimismInterface";
+import { VertexData, OptimismInterface } from "./optimismInterface";
 import { ethers } from 'ethers';
 
 export const api = {
@@ -25,16 +25,15 @@ export class apiv2 {
     return await this.interface.transfer(to, from, tokenId);
   }
 
-  async board(): Promise<AllVertexData[]> {
+  async board(): Promise<VertexData[]> {
     const lastId = await this.interface.getLastMintedId();
     if (lastId === 1) {
       return [];
     }
     const vertexIds: number[] = [...Array(lastId - 1)].map((_, index) => index+1);
     const vertexData = await Promise.all(vertexIds.map(async (vertexId) => {
-      const vertexData = await this.interface.getVertexData(vertexId);
-      const emissionMultiple = await this.interface.getVertexEmissionMultiple(vertexId);
-      return {...vertexData, emissionMultiple};
+      return await this.interface.getVertexData(vertexId);
+      ;
     }));
     return vertexData;
   }

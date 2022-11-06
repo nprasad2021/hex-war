@@ -15,20 +15,19 @@ type Hex = {
   b: number;
   c: number;
 }
-type VertexData = {
+export type VertexData = {
   id: number;
   owner: string;
   loc: Hex;
   lastTimestamp: ethers.BigNumber;
 }
 
-export type AllVertexData = VertexData & { emissionMultiple: ethers.BigNumber };
 
 // hard-coded
-const contractAddress = "0xa9540D662F63024E9A92927E0527B2bD95Cb9064";
+const contractAddress = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
 const alchemy = "https://opt-goerli.g.alchemy.com/v2/T0y4zfAJzll19yGU6wnbDucf2uaryuYt";
-const providers: string[] = [alchemy];
-
+const providers: string[] = [];
+providers.push(alchemy);
 providers.push('https://optimism-goerli.infura.io/v3/ef1c181eff004c08832fc05f31538300');
 providers.push('https://goerli.optimism.io');
 //const INFURA_PREFIX = "https://optimism-mainnet.infura.io/v3";
