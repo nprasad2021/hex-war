@@ -9,4 +9,4 @@ Moreover, while every NFT has a unique tokenId, every NFT is also uniquely repre
 NFT holders are able to mint new NFTs only in hex locations directly adjacent to an NFT they currently own. However users are not able to continously mint - a randomized cooldown period prevents constant expansion.
 
 Controlling a hex is valuable. The more NFTs someone owns that are located on the same hex, the lower cooldown periods exist for minting new NFTs.
-However, 
+Thus if someone else owns a single 
