@@ -7,7 +7,7 @@ type Hex = {
   c: number;
 }
 type VertexData = {
-  id: ethers.BigNumber;
+  id: number;
   owner: string;
   loc: Hex;
   lastTimestamp: ethers.BigNumber;
