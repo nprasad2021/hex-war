@@ -4,8 +4,11 @@ type Hex = {
   c: number;
 };
 
-export function get(): Array<Hex> {
-  return simulateHexes();
+export function get(): Array<Hex & { owner: string }> {
+  return simulateHexes().map(hex => ({
+    ...hex,
+    owner: owners[Math.floor(Math.random()*owners.length)]
+  }));
 }
 
 function getKey(hex: Hex): string {
@@ -25,7 +28,8 @@ function getAdjacentVertexes(hex: Hex): Hex[] {
 function simulateHexes(size: number = 6) {
   // return [
   //   { a: 0, b: 0, c: 0 },
-  //   { a: 1, b: 0, c: 0 }
+  //   { a: 1, b: 0, c: 0 },
+  //   { a: 0, b: 1, c: 0 }
   // ]
 
   const list: Hex[] = [];
@@ -54,3 +58,9 @@ function simulateHexes(size: number = 6) {
 
   return list;
 }
+
+const owners = [
+  "0x121a184B7e0d081B9F745e0e9ec408d7C26560F2",
+  "0x5dead1f49F17A4463956A5B6aabd6D96A900337D",
+  "0x3Ae6280f3524001Dc74C20E152eF155E56a6BEeb"
+]
