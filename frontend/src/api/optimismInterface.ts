@@ -61,7 +61,7 @@ export class OptimismInterface {
 
   async getVertexData(vertexId: number): Promise<VertexData> {
     const vertexData = await this.contract.getVertexData(vertexId);
-    return vertexData;
+    return {...vertexData, id: vertexId};
   }
 
   async getVertexEmissionMultiple(vertexId: number): Promise<ethers.BigNumber> {

@@ -311,6 +311,7 @@ abstract contract VertexERC721 {
         getVertex[id].owner = to;
         console.log("set owner");
         getVertex[id].loc = Position(a, b, c);
+        getVertex[id].id = id;
         console.log("set position");
         getTokenId[a][b][c] = id;
 
