@@ -37,6 +37,8 @@ function App() {
   const [selectedVertex, setSelectedVertex] = React.useState<number | null>(null);
 
   React.useEffect(() => {
+    let intervalRef: NodeJS.Timer;
+
     const fetchBoardV2 = async () => {
       const API = new api(null);
       const response = await API.board();
@@ -61,10 +63,9 @@ function App() {
         ...colors,
         ...colorRef.current,
       }
-      
+      intervalRef = setInterval(fetchBoardV2, 5_000);
     }
     fetchBoardV2();
-    const intervalRef = setInterval(fetchBoardV2, 2_000);
     return () => {
       clearInterval(intervalRef);
     }
