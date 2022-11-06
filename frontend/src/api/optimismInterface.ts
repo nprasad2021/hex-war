@@ -1,6 +1,15 @@
 import { contractAbi } from "./optimismContractAbi";
 import { ethers, PopulatedTransaction } from 'ethers';
 
+
+
+import { Network, Alchemy } from 'alchemy-sdk';
+
+// Optional Config object, but defaults to demo api-key and eth-mainnet.
+const settings = {
+  apiKey: 'demo', // Replace with your Alchemy API Key.
+  network: Network.OPT_MAINNET, // Replace with your network.
+};
 type Hex = {
   a: number;
   b: number;
@@ -21,7 +30,7 @@ const contractAddress = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
 export class OptimismInterface {
   private contract: ethers.Contract;
   constructor(providerUrlp: string | null) {
-    const providerUrl = providerUrlp ?? "https://goerli.optimism.io";
+    const providerUrl = "https://opt-goerli.g.alchemy.com/v2/btFDmr1rUj41iFQsig6gIAt9Q0qWUast"
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
     this.contract = new ethers.Contract(contractAddress, contractAbi, provider);
   }
