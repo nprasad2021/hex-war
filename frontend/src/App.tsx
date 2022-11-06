@@ -1,11 +1,14 @@
 import React from 'react';
+import { ethers } from "ethers";
 import styled from 'styled-components';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { HexGrid, Layout, Hexagon, Text, Pattern, Path, Hex, HexUtils } from 'react-hexgrid';
+import { HexGrid, Layout, Hexagon, Text, Pattern, Path, HexUtils } from 'react-hexgrid';
 
-import { api } from './api';
+import { apiv2 as api } from './api';
 import * as Coords from "./structs/coords";
 import * as Orientation from "./structs/orientation";
+
+import { Context } from "./webthree";
 
 const OPTIONS = {
   size: { x: 5, y: 5 },
@@ -13,22 +16,59 @@ const OPTIONS = {
   orientation: Orientation.POINTY,
 }
 
+type THex = {
+  a: number,
+  b: number,
+  c: number,
+  id: number,
+  owner: string,
+}
+
 function App() {
+  const context = React.useContext(Context);
+
   const gridElRef = React.useRef<HTMLDivElement | null>(null);
   const dragElRef = React.useRef<HTMLDivElement | null>(null);
   const dragPositionRef = React.useRef<[number, number]>([0, 0]);
   const dragMousedownRef = React.useRef<boolean>(false);
 
-  const [board, setBoard] = React.useState<ReturnType<typeof api.board.get>>(
-    []
-  );
+  const [board, setBoard] = React.useState<Array<THex>>([]);
+  const colorRef = React.useRef<Record<string, string>>({});
+  const [selectedVertex, setSelectedVertex] = React.useState<number | null>(null);
 
   React.useEffect(() => {
-    const fetchBoard = () => {
-      setBoard(api.board.get());
-    };
-    fetchBoard();
-  }, []);
+    const fetchBoardV2 = async () => {
+      const API = new api(null);
+      const response = await API.board();
+      // console.log(response)
+      const newBoard = response.map(hex => ({
+        a: hex.loc.a,
+        b: hex.loc.b,
+        c: hex.loc.c,
+        id: hex.id.toNumber(),
+        owner: hex.owner,
+      }))
+
+      const owners = new Set(newBoard.map((hex) => hex.owner));
+      const colors: Record<string, string> = [...owners].reduce((acc, owner) => {
+        // @ts-ignore
+        acc[owner] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+        return acc;
+      }, {});
+
+      setBoard(newBoard)
+      colorRef.current = {
+        ...colors,
+        ...colorRef.current,
+      }
+      
+    }
+    fetchBoardV2();
+    const intervalRef = setInterval(fetchBoardV2, 1_000);
+    return () => {
+      clearInterval(intervalRef);
+    }
+  }, [])
 
   React.useLayoutEffect(() => {
     const gridEl = gridElRef.current;
@@ -38,7 +78,6 @@ function App() {
     if (gridEl === null) return;
 
     const handler1 = (e: MouseEvent) => {
-      console.log("hi");
       dragPositionRef.current = [
         gridEl.offsetLeft - e.clientX,
         gridEl.offsetTop - e.clientY,
@@ -72,11 +111,7 @@ function App() {
   //   return `#${Math.floor(Math.random()*16777215).toString(16)}`;
   // });
   // @ts-ignore
-  const colors: Record<string, string> = [...owners].reduce((acc, owner) => {
-    // @ts-ignore
-    acc[owner] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
-    return acc;
-  }, {});
+
 
   const cubeCoords = board.map((hex) => new Coords.Cube(hex.a, hex.b, hex.c));
   const offsetCoords = [
@@ -85,9 +120,9 @@ function App() {
     ),
   ].map(Coords.Offset.fromString);
 
-  const testCube = new Coords.Cube(1, -3, 0);
-  console.log("TODO - buggy case here when converting to offset coord", testCube.getCenterCubes())
-  console.log(testCube.getCenterCubes().map(Coords.Offset.fromCube))
+  // const testCube = new Coords.Cube(1, -3, 0);
+  // console.log("TODO - buggy case here when converting to offset coord", testCube.getCenterCubes())
+  // console.log(testCube.getCenterCubes().map(Coords.Offset.fromCube))
 
   // Maps hexagon offset coordinates to all the cube coordinates related to that offset
   const associations = new Map();
@@ -113,7 +148,32 @@ function App() {
     });
   });
 
-  console.log("associations", associations);
+  const mintNft = async () => {
+    const ethersProvider = context.provider;
+    if (ethersProvider) {
+      const API = new api(null);
+      const signer = await ethersProvider.getSigner();
+      const txnData = await API.freeMint();
+      if (txnData) {
+        // const signData = await signer.signTransaction(txnData);
+        const txn = await signer.sendTransaction(txnData);
+        console.log("txn", txn)
+      }
+    }
+
+    // console.log(txnData);
+  }
+  const expandMintNft = async () => {
+    const ethersProvider = context.provider;
+    if (ethersProvider) {
+    }
+
+    // console.log(txnData);
+  }
+
+  // console.log(board)
+
+  const colors = colorRef.current;
 
   return (
     <StyledRoot>
@@ -129,7 +189,6 @@ function App() {
                   spacing={1.05}
                 >
                   <React.Fragment>
-                    <Path start={new Hex(0, 0, 0)} end={new Hex(0, -3, 0)} />
                     {board.map(({ owner, ...cube }) => {
                       const cubeCoord = new Coords.Cube(cube.a, cube.b, cube.c)
                       const offsetCoord = Coords.Offset.fromCube(cubeCoord)
@@ -143,7 +202,7 @@ function App() {
                           ownerCounts.set(boardItem.owner, 1)
                         }
                       })
-                      console.log(ownerCounts)
+                      // console.log(ownerCounts)
                       let majorityOwner: string | null = null;
                       let majorityOwnerCount: number = 0;
                       Array.from(ownerCounts.entries()).map(([owner, count]) => {
@@ -152,7 +211,7 @@ function App() {
                           majorityOwnerCount = count;
                         }
                       })
-                      console.log(majorityOwner)
+                      // console.log(majorityOwner)
 
                       return (
                         <Hexagon
@@ -165,7 +224,7 @@ function App() {
                       );
                     })}
                     <g>
-                      {board.map(({ owner, ...cube }) => {
+                      {board.map(({ id, owner, ...cube }) => {
                         const pixelCoords = Coords.Pixel.fromCube(
                           new Coords.Cube(cube.a, cube.b, cube.c),
                           OPTIONS
@@ -176,9 +235,15 @@ function App() {
                         return (
                           <circle
                             r="1"
+                            id={`${id}`}
                             cx={pixelCoords.x}
                             cy={pixelCoords.y}
-                            style={{ fill: colors[owner], stroke: "black", strokeWidth: 0.5 }}
+                            style={{
+                              fill: selectedVertex === id ? "white" : colors[owner],
+                              stroke: "black",
+                              strokeWidth: 0.5,
+                            }}
+                            onClick={() => setSelectedVertex(id)}
                             className="vertex"
                           />
                         );
@@ -193,12 +258,19 @@ function App() {
       </div>
       <div className="side">
         <div className="title">Hex War</div>
+        <div style={{ display: "flex", marginBottom: "36px" }}>
+          {context.address ? <div style={{ color: colors[context.address], fontSize: "24px" }}>you: {context.address.slice(0, 8)}...</div> : <button style={{ marginRight: "16px" }} onClick={() => context.connect()}>connect</button>}
+        </div>
         {Object.entries(colors).map(([address, color]) => (
           <div style={{ display: "flex", marginTop: "8px" }}>
             <div style={{ width: "24px", height: "24px", background: color, borderRadius: "50%" }} />
             <div style={{ color: "black", fontSize: "24px", marginLeft: "24px" }}>{address.slice(0, 8)}...</div>
           </div>
         ))}
+        <div style={{ display: "flex", marginTop: "36px" }}>
+          <button style={{ fontSize: "16px" }} onClick={mintNft}>Free mint</button>
+          {selectedVertex !== null && <button style={{ fontSize: "16px" }} onClick={expandMintNft}>expand mint</button>}
+        </div>
       </div>
     </StyledRoot>
   );

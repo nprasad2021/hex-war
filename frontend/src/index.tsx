@@ -6,15 +6,18 @@ import './index.css';
 import App from './App';
 import { theme } from './theme';
 import reportWebVitals from './reportWebVitals';
+import Web3Provider from "./webthree";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
+    <Web3Provider>
+      <ThemeProvider theme={theme}>
+        <App />
+      </ThemeProvider>
+    </Web3Provider>
   </React.StrictMode>
 );
 
