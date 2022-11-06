@@ -8,7 +8,7 @@ export class Cube {
     new Cube(-1, 0, 1),
     new Cube(-1, 1, 0),
     new Cube(0, 1, -1),
-  ]
+  ];
 
   x: number;
   y: number;
@@ -34,6 +34,21 @@ export class Cube {
       (cube) => (cube.x + cube.y + cube.z) % 3 === 0
     );
     return centerCubesJson.map((cube) => new Cube(cube.x, cube.y, cube.z));
+  }
+
+  toPixelString(options: {
+    size: { x: number; y: number };
+    origin: { x: number; y: number };
+    orientation: Orientation.Orientation;
+  }): string {
+    const { size, origin, orientation } = options;
+
+    const x: number =
+      (orientation.f0 * this.x + orientation.f1 * this.z) * size.x;
+    const y: number =
+      (orientation.f2 * this.x + orientation.f3 * this.z) * size.y;
+
+    return `${x},${y}`;
   }
 }
 
@@ -83,19 +98,12 @@ export class Pixel {
 }
 
 export class Offset {
-  x: number;
-  y: number;
+  row: number;
+  col: number;
 
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
-
-  toCube(): Cube {
-    const x = this.y - (this.x - (this.x & 1)) / 2;
-    const z = this.x;
-    const y = -x - z;
-    return new Cube(x, y, z);
+  constructor(row: number, col: number) {
+    this.row = row;
+    this.col = col;
   }
 
   toString(): string {
@@ -103,11 +111,13 @@ export class Offset {
   }
 
   static fromCube(cube: Cube): Offset {
-    return new Offset(cube.x + (cube.z + (cube.z % 2)) / 2, cube.z);
+    const row = cube.z;
+    const col = cube.x + (cube.z - (cube.z & 1)) / 2;
+    return new Offset(row, col);
   }
 
   static fromString(string: string): Offset {
     const json = JSON.parse(string);
-    return new Offset(json.x, json.y);
+    return new Offset(json.row, json.col);
   }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import { HexGrid, Layout, Hexagon, Text, Pattern, Path, Hex } from 'react-hexgrid';
+import { HexGrid, Layout, Hexagon, Text, Pattern, Path, Hex, HexUtils } from 'react-hexgrid';
 
 import { api } from './api';
 import * as Coords from "./structs/coords";
@@ -77,7 +77,6 @@ function App() {
     acc[owner] = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
     return acc;
   }, {});
-  console.log(colors);
 
   const cubeCoords = board.map((hex) => new Coords.Cube(hex.a, hex.b, hex.c));
   const offsetCoords = [
@@ -86,8 +85,9 @@ function App() {
     ),
   ].map(Coords.Offset.fromString);
 
-  // const testCube = new Coords.Cube(1, -3, 0);
-  // console.log("TODO - buggy case here when converting to offset coord", new Coords.Cube(1, -3, 0).getCenterCubes())
+  const testCube = new Coords.Cube(1, -3, 0);
+  console.log("TODO - buggy case here when converting to offset coord", testCube.getCenterCubes())
+  console.log(testCube.getCenterCubes().map(Coords.Offset.fromCube))
 
   // Maps hexagon offset coordinates to all the cube coordinates related to that offset
   const associations = new Map();
@@ -98,22 +98,22 @@ function App() {
 
     const cube = new Coords.Cube(boardItem.a, boardItem.b, boardItem.c);
     const centerCubes = cube.getCenterCubes();
-    const offsetCoords = centerCubes.map(Coords.Offset.fromCube);
+    const offsetCoords = centerCubes.map(cube => cube.toPixelString(OPTIONS));
+    // console.log(offsetCoords)
     
     // console.log("cube", cube, "offsetCoords", offsetCoords);
 
     offsetCoords.forEach((offset) => {
-      const key = offset.toString();
-      const existing = associations.get(key);
+      const existing = associations.get(offset);
       if (existing) {
-        associations.set(key, [...existing, boardItem]);
+        associations.set(offset, [...existing, boardItem]);
       } else {
-        associations.set(key, [boardItem]);
+        associations.set(offset, [boardItem]);
       }
     });
   });
 
-  // console.log("associations", associations);
+  console.log("associations", associations);
 
   return (
     <StyledRoot>
@@ -129,10 +129,11 @@ function App() {
                   spacing={1.05}
                 >
                   <React.Fragment>
+                    <Path start={new Hex(0, 0, 0)} end={new Hex(0, -3, 0)} />
                     {board.map(({ owner, ...cube }) => {
                       const cubeCoord = new Coords.Cube(cube.a, cube.b, cube.c)
                       const offsetCoord = Coords.Offset.fromCube(cubeCoord)
-                      const relatedBoardItems = associations.get(offsetCoord.toString());
+                      const relatedBoardItems = associations.get(cubeCoord.toPixelString(OPTIONS));
                       const ownerCounts = new Map<string, number>();
                       relatedBoardItems.map((boardItem: any) => {
                         const existing = ownerCounts.get(boardItem.owner);
@@ -142,6 +143,7 @@ function App() {
                           ownerCounts.set(boardItem.owner, 1)
                         }
                       })
+                      console.log(ownerCounts)
                       let majorityOwner: string | null = null;
                       let majorityOwnerCount: number = 0;
                       Array.from(ownerCounts.entries()).map(([owner, count]) => {
@@ -150,6 +152,7 @@ function App() {
                           majorityOwnerCount = count;
                         }
                       })
+                      console.log(majorityOwner)
 
                       return (
                         <Hexagon
@@ -167,9 +170,9 @@ function App() {
                           new Coords.Cube(cube.a, cube.b, cube.c),
                           OPTIONS
                         );
-                        if (pixelCoords.x === 0 && pixelCoords.y === 0) {
-                          return null;
-                        }
+                        // if (pixelCoords.x === 0 && pixelCoords.y === 0) {
+                        //   return null;
+                        // }
                         return (
                           <circle
                             r="1"
@@ -190,6 +193,12 @@ function App() {
       </div>
       <div className="side">
         <div className="title">Hex War</div>
+        {Object.entries(colors).map(([address, color]) => (
+          <div style={{ display: "flex", marginTop: "8px" }}>
+            <div style={{ width: "24px", height: "24px", background: color, borderRadius: "50%" }} />
+            <div style={{ color: "black", fontSize: "24px", marginLeft: "24px" }}>{address.slice(0, 8)}...</div>
+          </div>
+        ))}
       </div>
     </StyledRoot>
   );
