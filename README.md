@@ -18,3 +18,5 @@ Thus if someone else owns controls the entire hex, they have a much faster abili
 All state is completely stored, enforced, and verified on-chain. No backend required.
 
 Inspired by ArtGobblers experiment
+
+![My Image](assets/demo.png)
