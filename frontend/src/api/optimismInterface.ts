@@ -30,7 +30,7 @@ const contractAddress = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
 export class OptimismInterface {
   private contract: ethers.Contract;
   constructor(providerUrlp: string | null) {
-    const providerUrl = "https://opt-goerli.g.alchemy.com/v2/btFDmr1rUj41iFQsig6gIAt9Q0qWUast"
+    const providerUrl = "https://opt-goerli.g.alchemy.com/v2/T0y4zfAJzll19yGU6wnbDucf2uaryuYt"
     const provider = new ethers.providers.StaticJsonRpcProvider(providerUrl);
     this.contract = new ethers.Contract(contractAddress, contractAbi, provider);
   }
