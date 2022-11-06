@@ -24,11 +24,13 @@ export type VertexData = {
 
 
 // hard-coded
-const contractAddress = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
+const oldContract = "0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3";
+const newContract = "0xfD45F5Df87936520FD6BA273dd11aC610B569DF5";
+const contractAddress = oldContract;
 const alchemy = "https://opt-goerli.g.alchemy.com/v2/T0y4zfAJzll19yGU6wnbDucf2uaryuYt";
 const providers: string[] = [];
-providers.push(alchemy);
-providers.push('https://optimism-goerli.infura.io/v3/ef1c181eff004c08832fc05f31538300');
+//providers.push(alchemy);
+//providers.push('https://optimism-goerli.infura.io/v3/ef1c181eff004c08832fc05f31538300');
 providers.push('https://goerli.optimism.io');
 //const INFURA_PREFIX = "https://optimism-mainnet.infura.io/v3";
 //providers.push(INFURA_PREFIX + "/e15ef59edf294e02aaad54c2640b69ab");
