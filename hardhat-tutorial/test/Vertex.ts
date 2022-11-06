@@ -13,7 +13,7 @@ describe("Vertex", function () {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const Vertex = await ethers.getContractFactory("Vertex");
-    const vertex = await Vertex.attach("0x5fbdb2315678afecb367f032d93f642f64180aa3");
+    const vertex = await Vertex.attach("0x1F45c359A5BBd1896775Cb29D87eb824d59d73A3");
     });
 
   });

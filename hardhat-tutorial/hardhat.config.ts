@@ -10,7 +10,11 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       allowUnlimitedContractSize: true
-    }
+    },
+    'optimism-goerli': {
+      url: "https://goerli.optimism.io",
+      accounts: ['']
+    },
   }
 };
 
