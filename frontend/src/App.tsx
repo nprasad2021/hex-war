@@ -40,12 +40,11 @@ function App() {
     const fetchBoardV2 = async () => {
       const API = new api(null);
       const response = await API.board();
-      // console.log(response)
       const newBoard = response.map(hex => ({
         a: hex.loc.a,
         b: hex.loc.b,
         c: hex.loc.c,
-        id: hex.id.toNumber(),
+        id: hex.id,
         owner: hex.owner,
       }))
 
@@ -56,6 +55,7 @@ function App() {
         return acc;
       }, {});
 
+      // @ts-ignore
       setBoard(newBoard)
       colorRef.current = {
         ...colors,
@@ -64,7 +64,7 @@ function App() {
       
     }
     fetchBoardV2();
-    const intervalRef = setInterval(fetchBoardV2, 1_000);
+    const intervalRef = setInterval(fetchBoardV2, 2_000);
     return () => {
       clearInterval(intervalRef);
     }
@@ -106,19 +106,19 @@ function App() {
     // }
   }, []);
 
-  const owners = new Set(board.map((hex) => hex.owner));
-  // const colorsArray = new Array(owners.size).fill(0).map(() => {
-  //   return `#${Math.floor(Math.random()*16777215).toString(16)}`;
-  // });
-  // @ts-ignore
+  // const owners = new Set(board.map((hex) => hex.owner));
+  // // const colorsArray = new Array(owners.size).fill(0).map(() => {
+  // //   return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+  // // });
+  // // @ts-ignore
 
 
-  const cubeCoords = board.map((hex) => new Coords.Cube(hex.a, hex.b, hex.c));
-  const offsetCoords = [
-    ...new Set(
-      cubeCoords.map((cube) => Coords.Offset.fromCube(cube).toString())
-    ),
-  ].map(Coords.Offset.fromString);
+  // const cubeCoords = board.map((hex) => new Coords.Cube(hex.a, hex.b, hex.c));
+  // const offsetCoords = [
+  //   ...new Set(
+  //     cubeCoords.map((cube) => Coords.Offset.fromCube(cube).toString())
+  //   ),
+  // ].map(Coords.Offset.fromString);
 
   // const testCube = new Coords.Cube(1, -3, 0);
   // console.log("TODO - buggy case here when converting to offset coord", testCube.getCenterCubes())
@@ -165,7 +165,15 @@ function App() {
   }
   const expandMintNft = async () => {
     const ethersProvider = context.provider;
-    if (ethersProvider) {
+    if (ethersProvider && selectedVertex !== null) {
+      const API = new api(null);
+      const signer = await ethersProvider.getSigner();
+      const txnData = await API.mintFromOwnedResource(selectedVertex);
+      if (txnData) {
+        // const signData = await signer.signTransaction(txnData);
+        const txn = await signer.sendTransaction(txnData);
+        console.log("txn", txn)
+      }
     }
 
     // console.log(txnData);
@@ -269,7 +277,7 @@ function App() {
         ))}
         <div style={{ display: "flex", marginTop: "36px" }}>
           <button style={{ fontSize: "16px" }} onClick={mintNft}>Free mint</button>
-          {selectedVertex !== null && <button style={{ fontSize: "16px" }} onClick={expandMintNft}>expand mint</button>}
+          {selectedVertex !== null && <button style={{ fontSize: "16px", marginLeft: "16px" }} onClick={expandMintNft}>expand mint</button>}
         </div>
       </div>
     </StyledRoot>
