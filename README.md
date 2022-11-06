@@ -1,6 +1,6 @@
 # Hex-War
-**See the live app at https://hex-war-nprasad2021.vercel.app/
-**
+**See the live app at https://hex-war-nprasad2021.vercel.app/**
+
 Conquer a virtual world. Grow your holdings by aggressively seeking to mint, and seek NFTs that encircle plots of land, to make them 
 
 ## Mechanics
