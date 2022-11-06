@@ -15,7 +15,7 @@ library LibGOO {
     /// @param lastBalanceWad The last checkpointed balance to apply the emission multiple over time to, scaled by 1e18.
     /// @param timeElapsedWad The time elapsed since the last checkpoint, scaled by 1e18.
     function computeGOOBalance(
-        uint256 emissionMultiple,
+        uint32 emissionMultiple,
         uint256 lastBalanceWad,
         uint256 timeElapsedWad
     ) internal pure returns (uint256) {

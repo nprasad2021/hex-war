@@ -8,6 +8,11 @@ function getAdjacentVertexes(hex: Hex): Hex[] {
   const newHexes: Hex[] = [{...hex, a: hex.a + 1}, {...hex, a: hex.a - 1}, {...hex, b: hex.b + 1}, {...hex, b: hex.b - 1}, {...hex, c: hex.c - 1}, {...hex, c: hex.c + 1}];
   return newHexes.filter((nhex) => (nhex.a + nhex.b + nhex.c) % 3 !== 0);
 }
+
+function getCenterHexes(hex: Hex) {
+  const newHexes: Hex[] = [{...hex, a: hex.a + 1}, {...hex, a: hex.a - 1}, {...hex, b: hex.b + 1}, {...hex, b: hex.b - 1}, {...hex, c: hex.c - 1}, {...hex, c: hex.c + 1}];
+  return newHexes.filter((nhex) => (nhex.a + nhex.b + nhex.c) % 3 === 0);
+}
 function getRandomHexes(){
   const masterList: Hex[] = [];
   const seen = new Set<string>();

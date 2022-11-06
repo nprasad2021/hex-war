@@ -14,19 +14,16 @@ contract Resource is ERC20("Resource", "RESOURCE", 18) {
                                 ADDRESSES
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice The address of the Art Gobblers contract.
-    address public immutable Vertex;
-
-    error Unauthorized();
+    address vertex;
 
     /*//////////////////////////////////////////////////////////////
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Sets the addresses of relevant contracts.
-    /// @param _vertexAddress of the Vertex contract.
-    constructor(address _vertexAddress) {
-        Vertex = _vertexAddress;
+    constructor() {}
+
+    function setVertex(address _vertex) public {
+        vertex = _vertex;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -35,7 +32,7 @@ contract Resource is ERC20("Resource", "RESOURCE", 18) {
 
     /// @notice Requires caller address to match user address.
     modifier only(address user) {
-        if (msg.sender != user) revert Unauthorized();
+        if (msg.sender != user) revert();
 
         _;
     }
@@ -43,14 +40,14 @@ contract Resource is ERC20("Resource", "RESOURCE", 18) {
     /// @notice Mint any amount of resource to a user. Can only be called by Vertex .
     /// @param to The address of the user to mint Resource to.
     /// @param amount The amount of Resource to mint.
-    function mintFromVertex(address to, uint256 amount) external only(Vertex) {
+    function mintFromVertex(address to, uint256 amount) external only(vertex) {
         _mint(to, amount);
     }
 
     /// @notice Burn any amount of Resource from a user. Can only be called by Vertex .
     /// @param from The address of the user to burn Resource from.
     /// @param amount The amount of Resource to burn.
-    function burnForVertex(address from, uint256 amount) external only(Vertex) {
+    function burnForVertex(address from, uint256 amount) external only(vertex) {
         _burn(from, amount);
     }
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity >=0.8.0;
+import "hardhat/console.sol";
 
+/// @author Neeraj Prasad <neeruj.prasad@gmail.com>
 /// @notice ERC721 implementation forked from ArtGobblers
 abstract contract VertexERC721 {
     /*//////////////////////////////////////////////////////////////
@@ -33,17 +35,21 @@ abstract contract VertexERC721 {
 
     string public symbol;
 
-    function tokenURI(uint256 id) external view virtual returns (string memory);
+    function tokenURI(uint256 id) external pure returns (string memory) {
+        return "";
+    }
 
     /*//////////////////////////////////////////////////////////////
                          VERTEX/ERC721 STORAGE
     //////////////////////////////////////////////////////////////*/
 
     struct Position {
-        uint32 a;
-        uint32 b;
-        uint32 c;
+        int32 a;
+        int32 b;
+        int32 c;
     }
+
+    Position[6] validLocations;
 
     /// @notice Struct holding vertex data.
     struct VertexData {
@@ -55,20 +61,16 @@ abstract contract VertexERC721 {
         Position loc;
         // Multiple --> # of vertexes surrounding gobblers..
         uint32 emissionMultiple;
+        uint64 lastTimestamp;
     }
 
-    /// @notice Maps hex location to token id.
-    mapping(uint32 => mapping(uint32 => mapping(uint32 => uint256))) getTokenId;
+    mapping(int32 => mapping(int32 => mapping(int32 => uint256))) getTokenId;
 
-    /// @notice Maps token id to their data.
     mapping(uint256 => VertexData) public getVertex;
 
     /// @notice Struct holding data relevant to each user's account.
     struct UserData {
         uint32 vertexesOwned;
-        uint32 emissionMultiple;
-        uint128 lastBalance;
-        uint64 lastTimestamp;
     }
 
     /// @notice Maps user addresses to their account data.
@@ -79,9 +81,9 @@ abstract contract VertexERC721 {
     }
 
     function isVertexValid(
-        uint32 a,
-        uint32 b,
-        uint32 c
+        int32 a,
+        int32 b,
+        int32 c
     ) public pure returns (bool) {
         // invalid hex coordinate (always say is minted)
         if ((a + b + c) % 3 == 0) {
@@ -90,47 +92,116 @@ abstract contract VertexERC721 {
         return true;
     }
 
+    function getOwner(
+        int32 a,
+        int32 b,
+        int32 c
+    ) public view returns (address) {
+        return getVertex[getTokenId[a][b][c]].owner;
+    }
+
     function isVertexMintable(
-        uint32 a,
-        uint32 b,
-        uint32 c
-    ) internal view returns (bool) {
+        int32 a,
+        int32 b,
+        int32 c
+    ) public view returns (bool) {
         return isVertexValid(a, b, c) && (getTokenId[a][b][c] == 0);
     }
 
-    function getNextVertex(Position memory loc)
-        public
-        view
-        returns (Position memory pos)
-    {
+    function getEmissionMultipleFromHex(
+        address owner,
+        int32 a,
+        int32 b,
+        int32 c
+    ) public view returns (uint32) {
+        // vertexes are not allowed
+        if (isVertexValid(a, b, c)) {
+            return 0;
+        }
+        uint32 count = 0;
+        unchecked {
+            if (getOwner(a + 1, b, c) == owner) {
+                count = count + 1;
+            }
+            if (getOwner(a - 1, b, c) == owner) {
+                count = count + 1;
+            }
+            if (getOwner(a, b + 1, c) == owner) {
+                count = count + 1;
+            }
+            if (getOwner(a, b - 1, c) == owner) {
+                count = count + 1;
+            }
+            if (getOwner(a, b, c + 1) == owner) {
+                count = count + 1;
+            }
+            if (getOwner(a, b, c - 1) == owner) {
+                count = count + 1;
+            }
+        }
+        return count;
+    }
+
+    function max(uint32 a, uint32 b) public pure returns (uint32) {
+        return a >= b ? a : b;
+    }
+
+    function getEmissionMultiple(
+        int32 a,
+        int32 b,
+        int32 c
+    ) public view returns (uint32) {
+        require(isVertexValid(a, b, c), "location not a vertex");
+        require(getOwner(a, b, c) != address(0), "no owner for vertex");
+        address owner = getOwner(a, b, c);
+
+        uint32 count = 0;
+        unchecked {
+            count = max(count, getEmissionMultipleFromHex(owner, a + 1, b, c));
+            count = max(count, getEmissionMultipleFromHex(owner, a - 1, b, c));
+            count = max(count, getEmissionMultipleFromHex(owner, a, b + 1, c));
+            count = max(count, getEmissionMultipleFromHex(owner, a, b - 1, c));
+            count = max(count, getEmissionMultipleFromHex(owner, a, b, c + 1));
+            count = max(count, getEmissionMultipleFromHex(owner, a, b, c - 1));
+        }
+        return count;
+    }
+
+    function getNextVertex(
+        int32 a,
+        int32 b,
+        int32 c
+    ) public returns (Position memory pos) {
         //  6 possible places
-        Position[6] memory validLocations;
         uint256 index = 0;
-        if (isVertexMintable(loc.a + 1, loc.b, loc.c)) {
-            validLocations[index] = Position(loc.a + 1, loc.b, loc.c);
-            ++index;
+        unchecked {
+            if (isVertexMintable(a + 1, b, c)) {
+                validLocations[index] = Position(a + 1, b, c);
+                index = index + 1;
+            }
+            if (isVertexMintable(a - 1, b, c)) {
+                validLocations[index] = Position(a - 1, b, c);
+                index = index + 1;
+            }
+            if (isVertexMintable(a, b + 1, c)) {
+                validLocations[index] = Position(a, b + 1, c);
+                index = index + 1;
+            }
+            if (isVertexMintable(a, b - 1, c)) {
+                validLocations[index] = Position(a, b - 1, c);
+                index = index + 1;
+            }
+            if (isVertexMintable(a, b, c + 1)) {
+                validLocations[index] = Position(a, b, c + 1);
+                index = index + 1;
+            }
+            if (isVertexMintable(a, b, c - 1)) {
+                validLocations[index] = Position(a, b, c - 1);
+                index = index + 1;
+            }
         }
-        if (isVertexMintable(loc.a - 1, loc.b, loc.c)) {
-            validLocations[index] = Position(loc.a - 1, loc.b, loc.c);
-            ++index;
-        }
-        if (isVertexMintable(loc.a, loc.b + 1, loc.c)) {
-            validLocations[index] = Position(loc.a, loc.b + 1, loc.c);
-            ++index;
-        }
-        if (isVertexMintable(loc.a, loc.b - 1, loc.c)) {
-            validLocations[index] = Position(loc.a, loc.b - 1, loc.c);
-            ++index;
-        }
-        if (isVertexMintable(loc.a, loc.b, loc.c + 1)) {
-            validLocations[index] = Position(loc.a, loc.b, loc.c + 1);
-            ++index;
-        }
-        if (isVertexMintable(loc.a, loc.b, loc.c - 1)) {
-            validLocations[index] = Position(loc.a, loc.b, loc.c - 1);
-            ++index;
-        }
-        require(index > 0);
+        console.log("numValidLocations", index);
+        require(index > 0, "no valid spots available to mint");
         return validLocations[block.timestamp % index];
     }
 
@@ -225,18 +296,23 @@ abstract contract VertexERC721 {
     function _mint(
         address to,
         uint256 id,
-        Position memory p
+        int32 a,
+        int32 b,
+        int32 c
     ) internal {
-        require(isVertexMintable(p.a, p.b, p.c)); // require that location has not been minted
+        require(isVertexMintable(a, b, c)); // require that location has not been minted
         require(getVertex[id].owner == address(0)); // require that token-id as not been minted yet
 
-        unchecked {
-            ++getUserData[to].vertexesOwned;
-        }
+        // update number owned
+        ++getUserData[to].vertexesOwned;
+        // update timestamp
+        getVertex[id].lastTimestamp = uint64(block.timestamp);
 
         getVertex[id].owner = to;
-        getVertex[id].loc = p;
-        getTokenId[p.a][p.b][p.c] = id;
+        console.log("set owner");
+        getVertex[id].loc = Position(a, b, c);
+        console.log("set position");
+        getTokenId[a][b][c] = id;
 
         emit Transfer(address(0), to, id);
     }
